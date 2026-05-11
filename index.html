@@ -376,11 +376,15 @@ function updateSummary() {
   }
 }
 
-function submitForm() {
+// ── Paste your Apps Script Web App URL here ──
+const SHEET_URL = 'https://script.google.com/a/macros/samsara.com/s/AKfycbwgk9ivBLUUf7ffVwFb_pZ_yBZSC3uL3UvHYEJW0K0BvnMoN6ZaTFPt7iK-iTjGn2sa/exec';
+
+async function submitForm() {
   const name   = document.getElementById('analyst-name').value.trim();
   const role   = document.getElementById('analyst-role').value;
   const weekOf = document.getElementById('week-of').value;
   const tot    = totalMins();
+  const btn    = document.querySelector('.submit-btn');
 
   if (!name)   { alert('Please enter your name.'); return; }
   if (!role)   { alert('Please select your role.'); return; }
@@ -393,10 +397,50 @@ function submitForm() {
     return;
   }
 
+  if (!SHEET_URL || SHEET_URL === 'PASTE_YOUR_APPS_SCRIPT_URL_HERE') {
+    alert('No submission URL configured. Paste your Apps Script Web App URL into the SHEET_URL variable at the top of the script.');
+    return;
+  }
+
+  const payload = {
+    submittedAt: new Date().toISOString(),
+    name, role, weekOf,
+    notes: document.getElementById('notes').value,
+    totalMins: tot,
+    allocation: Object.fromEntries(CATS.map(c => [c.id, { mins: mins[c.id], hhmm: toHHMM(mins[c.id]) }])),
+  };
+
+  // Loading state
+  btn.textContent = 'Submitting…';
+  btn.disabled = true;
+  btn.style.opacity = '0.6';
+
+  try {
+    const res = await fetch(SHEET_URL, {
+      method: 'POST',
+      mode: 'no-cors', // Apps Script requires no-cors
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+
+    // no-cors always returns opaque response — treat reaching this point as success
+    showConfirm(name, role, weekOf);
+    btn.textContent = 'Submitted ✓';
+    btn.style.background = 'var(--accent)';
+
+  } catch (err) {
+    btn.textContent = 'Submit assessment';
+    btn.disabled = false;
+    btn.style.opacity = '1';
+    alert('Submission failed — check your internet connection and try again.\n\n' + err.message);
+  }
+}
+
+function showConfirm(name, role, weekOf) {
   const roleLabel = { sr:'Sr. Quality Analyst', qa:'Quality Analyst', qpm:'Quality Program Manager' }[role] || role;
   const panel = document.getElementById('confirm-panel');
-  const subEl  = document.getElementById('confirm-sub');
-  const grid   = document.getElementById('confirm-grid');
+  const subEl = document.getElementById('confirm-sub');
+  const grid  = document.getElementById('confirm-grid');
 
   if (subEl) subEl.textContent = `${name} · ${roleLabel} · Week of ${weekOf}`;
 
@@ -411,15 +455,6 @@ function submitForm() {
   }
 
   if (panel) { panel.style.display='block'; panel.scrollIntoView({behavior:'smooth',block:'nearest'}); }
-
-  // Structured output — replace with webhook/sheet integration if needed
-  console.log('QA Capacity Self-Assessment', {
-    submittedAt: new Date().toISOString(),
-    name, role, weekOf,
-    notes: document.getElementById('notes').value,
-    totalMins: tot,
-    allocation: Object.fromEntries(CATS.map(c => [c.id, { mins: mins[c.id], hhmm: toHHMM(mins[c.id]) }])),
-  });
 }
 
 document.getElementById('analyst-name').addEventListener('input', updateTotal);
