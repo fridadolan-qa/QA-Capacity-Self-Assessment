@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>QA Capacity Self-Assessment</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Lora:ital,wght@0,400;0,600;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#1a1917;--ink2:#3d3b38;--muted:#6b6860;--faint:#a09d96;
+  --bg:#f6f4ef;--surface:#fff;--surface2:#f0ede6;
+  --border:#e0dcd4;--border-strong:#c4bfb5;
+  --accent:#2d5a3d;--accent-bg:#eaf2ec;--accent-bd:#b3d4bb;
+  --warn:#7a4510;--warn-bg:#fdf0e3;--warn-bd:#f0c990;
+  --red:#8b2525;--red-bg:#fdf0f0;--red-bd:#e8b0b0;
+  --blue:#0c447c;--blue-bg:#e6f1fb;
+  --mono:'DM Mono',monospace;--serif:'Lora',serif;--sans:'DM Sans',sans-serif;
+  --r:6px;--rl:12px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6}
+
+/* ── Cap ── */
+.page-cap{background:var(--ink);color:#fff;padding:32px 40px 28px}
+.cap-eyebrow{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.38);text-transform:uppercase;letter-spacing:.14em;margin-bottom:10px}
+.cap-title{font-family:var(--serif);font-size:28px;font-weight:600;line-height:1.2;margin-bottom:6px}
+.cap-sub{font-size:13px;color:rgba(255,255,255,.5);max-width:540px;line-height:1.6}
+.cap-strip{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:1px solid rgba(255,255,255,.1)}
+.cap-identity{display:flex;gap:14px;flex-wrap:wrap}
+.id-field{display:flex;flex-direction:column;gap:4px}
+.id-field label{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em}
+.id-field input,.id-field select{font-family:var(--mono);font-size:13px;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:var(--r);padding:7px 12px;outline:none;min-width:160px}
+.id-field input::placeholder{color:rgba(255,255,255,.3)}
+.id-field select option{background:var(--ink);color:#fff}
+.id-field input:focus,.id-field select:focus{border-color:rgba(255,255,255,.4);background:rgba(255,255,255,.12)}
+
+/* ── Body ── */
+.body{max-width:760px;margin:0 auto;padding:32px 24px 80px}
+
+/* ── Total band ── */
+.total-band{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px 20px;margin-bottom:24px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.total-bar-wrap{flex:1;min-width:180px}
+.total-bar-top{display:flex;justify-content:space-between;margin-bottom:5px}
+.total-bar-lbl{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.total-bar-bg{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden}
+.total-bar-fill{height:100%;border-radius:3px;transition:width .2s,background .2s;background:var(--blue)}
+.total-num{font-family:var(--mono);font-size:26px;font-weight:500;transition:color .2s;color:var(--ink);white-space:nowrap}
+.total-of{font-size:12px;color:var(--muted);white-space:nowrap}
+.total-badge{font-family:var(--mono);font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;white-space:nowrap}
+.tb-ok  {background:var(--accent-bg);color:var(--accent);border:1px solid var(--accent-bd)}
+.tb-over{background:var(--red-bg);color:var(--red);border:1px solid var(--red-bd)}
+.tb-rem {background:var(--blue-bg);color:var(--blue);border:1px solid #b5d4f4}
+
+/* ── Section ── */
+.sec-hd{display:flex;align-items:baseline;gap:10px;margin-bottom:10px;margin-top:24px}
+.sec-title{font-family:var(--serif);font-size:15px;font-weight:600;color:var(--ink2)}
+.sec-rule{flex:1;height:1px;background:var(--border)}
+
+/* ── Category rows ── */
+.cat-row{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 18px;margin-bottom:8px;transition:border-color .15s}
+.cat-row:hover{border-color:var(--border-strong)}
+.cat-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px}
+.cat-info{flex:1;min-width:0}
+.cat-name{font-size:14px;font-weight:500;color:var(--ink);margin-bottom:2px}
+.cat-desc{font-size:12px;color:var(--muted);line-height:1.5}
+.cat-time-display{display:flex;flex-direction:column;align-items:flex-end;flex-shrink:0;gap:2px}
+.cat-hhmm{font-family:var(--mono);font-size:22px;font-weight:500;color:var(--ink);line-height:1;white-space:nowrap}
+.cat-mins-sub{font-family:var(--mono);font-size:10px;color:var(--faint)}
+
+/* slider */
+.cat-slider-wrap{position:relative;margin-bottom:0}
+.cat-track-bg{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;position:relative}
+.cat-track-fill{height:100%;border-radius:4px;transition:width .15s;position:absolute;top:0;left:0;pointer-events:none}
+.cat-slider{position:absolute;top:50%;transform:translateY(-50%);left:0;right:0;width:100%;-webkit-appearance:none;appearance:none;height:8px;background:transparent;outline:none;cursor:pointer;margin:0;padding:0;z-index:2}
+.cat-slider::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--ink);border:2px solid var(--bg);box-shadow:0 1px 4px rgba(0,0,0,.18);cursor:pointer;transition:transform .1s}
+.cat-slider::-webkit-slider-thumb:hover{transform:scale(1.12)}
+
+
+/* ── Summary table ── */
+.summary-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px 20px;margin-top:24px;margin-bottom:24px}
+.sum-title{font-family:var(--serif);font-size:14px;font-weight:600;color:var(--ink2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sum-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.sum-hdr{display:grid;grid-template-columns:1fr 80px 1fr;gap:8px;align-items:center;padding-bottom:7px;border-bottom:1px solid var(--border);margin-bottom:2px}
+.sum-hdr span{font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.05em;color:var(--faint)}
+.sum-hdr span:last-child{text-align:right}
+.sum-row{display:grid;grid-template-columns:1fr 80px 1fr;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+.sum-row:last-child{border-bottom:none}
+.sum-name{font-size:13px;color:var(--ink2)}
+.sum-val{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--ink);text-align:center}
+.sum-bar-wrap{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.sum-bar-bg{width:80px;height:4px;background:var(--surface2);border-radius:2px;overflow:hidden}
+.sum-bar-fill{height:100%;border-radius:2px;transition:width .2s}
+.sum-pct{font-family:var(--mono);font-size:11px;color:var(--faint);width:30px;text-align:right}
+
+/* ── Notes ── */
+.notes-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 18px;margin-bottom:24px}
+.notes-lbl{font-family:var(--mono);font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);margin-bottom:8px}
+.notes-card textarea{width:100%;font-family:var(--sans);font-size:13px;color:var(--ink);background:transparent;border:none;outline:none;resize:vertical;min-height:68px;line-height:1.6}
+.notes-card textarea::placeholder{color:var(--faint)}
+
+/* ── Submit ── */
+.submit-row{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.submit-hint{font-size:12px;color:var(--faint)}
+.submit-btn{font-family:var(--mono);font-size:12px;font-weight:500;padding:11px 24px;background:var(--ink);color:#fff;border:none;border-radius:var(--r);cursor:pointer;text-transform:uppercase;letter-spacing:.08em;transition:all .15s}
+.submit-btn:hover{background:var(--ink2);transform:translateY(-1px)}
+.submit-btn:active{transform:translateY(0)}
+
+/* ── Confirm ── */
+.confirm-panel{display:none;background:var(--accent-bg);border:1px solid var(--accent-bd);border-radius:var(--rl);padding:20px 24px;margin-top:20px}
+.confirm-title{font-family:var(--serif);font-size:16px;font-weight:600;color:var(--accent);margin-bottom:4px}
+.confirm-sub{font-size:13px;color:var(--accent);opacity:.8;margin-bottom:14px}
+.confirm-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;border-top:1px solid var(--accent-bd);padding-top:14px}
+.cg-item{background:rgba(255,255,255,.55);border-radius:var(--r);padding:8px 10px}
+.cg-lbl{font-family:var(--mono);font-size:10px;color:var(--accent);opacity:.65;margin-bottom:2px;line-height:1.3}
+.cg-val{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--accent)}
+
+/* ── Animations ── */
+@keyframes fadein{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.cat-row{animation:fadein .28s ease both}
+.cat-row:nth-child(1){animation-delay:.03s}.cat-row:nth-child(2){animation-delay:.06s}
+.cat-row:nth-child(3){animation-delay:.09s}.cat-row:nth-child(4){animation-delay:.12s}
+.cat-row:nth-child(5){animation-delay:.15s}.cat-row:nth-child(6){animation-delay:.18s}
+.cat-row:nth-child(7){animation-delay:.21s}.cat-row:nth-child(8){animation-delay:.24s}
+
+@media(max-width:600px){
+  .page-cap{padding:24px 20px 20px}.cap-title{font-size:22px}
+  .cap-identity{flex-direction:column;gap:10px}
+  .id-field input,.id-field select{min-width:100%}
+  .body{padding:24px 16px 60px}
+  .sum-hdr,.sum-row{grid-template-columns:1fr 64px 80px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Cap ── -->
+<div class="page-cap">
+  <div class="cap-eyebrow">Quality Intelligence Team</div>
+  <div class="cap-title">Capacity Self-Assessment</div>
+  <div class="cap-sub">Declare how your time is actually distributed this week. No right answers — just an honest read of where your hours are going.</div>
+  <div class="cap-strip">
+    <div class="cap-identity">
+      <div class="id-field">
+        <label>Your name</label>
+        <input type="text" id="analyst-name" placeholder="Full name" autocomplete="off">
+      </div>
+      <div class="id-field">
+        <label>Role</label>
+        <select id="analyst-role">
+          <option value="">Select role</option>
+          <option value="sr">Sr. Quality Analyst</option>
+          <option value="qa">Quality Analyst</option>
+          <option value="qpm">Quality Program Manager</option>
+        </select>
+      </div>
+      <div class="id-field">
+        <label>Week of</label>
+        <input type="date" id="week-of">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="body">
+
+  <!-- ── Total band ── -->
+  <div class="total-band">
+    <div class="total-bar-wrap">
+      <div class="total-bar-top">
+        <span class="total-bar-lbl">Total allocated</span>
+        <span class="total-bar-lbl" id="total-bar-pct">0%</span>
+      </div>
+      <div class="total-bar-bg"><div class="total-bar-fill" id="total-bar-fill" style="width:0%"></div></div>
+    </div>
+    <div>
+      <div class="total-num" id="total-num">0:00</div>
+      <div class="total-of">of 37:30 hrs/week</div>
+    </div>
+    <div class="total-badge tb-rem" id="total-badge">37:30 remaining</div>
+  </div>
+
+  <!-- ── Categories ── -->
+  <div id="cat-container"></div>
+
+  <!-- ── Summary ── -->
+  <div class="summary-section">
+    <div class="sum-title">Weekly time summary</div>
+    <div class="sum-hdr">
+      <span>Category</span>
+      <span style="text-align:center">Time</span>
+      <span style="text-align:right">Share of week</span>
+    </div>
+    <div id="sum-rows"></div>
+  </div>
+
+  <!-- ── Notes ── -->
+  <div class="sec-hd"><span class="sec-title">Context &amp; blockers</span><span class="sec-rule"></span></div>
+  <div class="notes-card">
+    <div class="notes-lbl">What's pulling your time in unexpected directions this week?</div>
+    <textarea id="notes" placeholder="Optional — anything that would help your manager understand the distribution..."></textarea>
+  </div>
+
+  <!-- ── Submit ── -->
+  <div class="submit-row">
+    <div class="submit-hint" id="submit-hint">Enter your name and role to get started.</div>
+    <button class="submit-btn" onclick="submitForm()">Submit assessment</button>
+  </div>
+
+  <div class="confirm-panel" id="confirm-panel">
+    <div class="confirm-title">Assessment recorded.</div>
+    <div class="confirm-sub" id="confirm-sub"></div>
+    <div class="confirm-grid" id="confirm-grid"></div>
+  </div>
+
+</div>
+
+<script>
+// ── Constants ──
+const TOTAL_MINS = 37 * 60 + 30; // 37:30 = 2250 min
+const STEP = 15; // 15-min increments
+const MAX_MINS = TOTAL_MINS;
+
+// ── Categories ──
+const CATS = [
+  { id:'hitl',    name:'People HITL audits',              desc:'Validating AI-scored tickets — reviewing AutoQA decisions, flagging model errors, handling disputes', section:'audit',  color:'#378ADD' },
+  { id:'p3',      name:'Process / Product / Policy audits', desc:'Targeted systemic audits identifying non-agent drivers of friction and escalation feedback',          section:'audit',  color:'#1D9E75' },
+  { id:'dsat',    name:'DSAT & THF reviews',              desc:'Reviewing dissatisfied and top-handle-failure tickets for root cause classification',                  section:'audit',  color:'#BA7517' },
+  { id:'ata',     name:'Audit the Auditor (ATA)',          desc:'Calibration audits — reviewing supervisor or analyst work for accuracy and consistency',               section:'audit',  color:'#7F77DD' },
+  { id:'meetings',name:'Meetings & syncs',                desc:'Team meetings, supervisor syncs, calibrations, 1:1s, standups',                                       section:'ops',    color:'#534AB7' },
+  { id:'project', name:'Project & improvement work',      desc:'AutoQA expansion, reporting engine, AI tooling, prompt refinement, continuous improvement',            section:'ops',    color:'#0F6E56' },
+  { id:'admin',   name:'Admin & reactive work',           desc:'Email, Slack, Jira requests, ad-hoc asks, unplanned interruptions, context-switching',                 section:'ops',    color:'#888780' },
+  { id:'dev',     name:'Learning & development',          desc:'Training, skill-building, documentation, onboarding support',                                          section:'ops',    color:'#D4537E' },
+];
+
+const mins = {};
+CATS.forEach(c => mins[c.id] = 0);
+
+// ── Helpers ──
+function toHHMM(m) {
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+  return `${h}:${mm.toString().padStart(2,'0')}`;
+}
+
+function totalMins() {
+  return Object.values(mins).reduce((s,v) => s + v, 0);
+}
+
+// ── Set week-of default to current Monday ──
+(function(){
+  const d = new Date();
+  const day = d.getDay();
+  const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+  d.setDate(diff);
+  document.getElementById('week-of').value = d.toISOString().split('T')[0];
+})();
+
+// ── Build category rows ──
+function buildCats() {
+  const container = document.getElementById('cat-container');
+  container.innerHTML = '';
+  let lastSec = '';
+
+  CATS.forEach((cat, idx) => {
+    if (cat.section !== lastSec) {
+      const hd = document.createElement('div');
+      hd.className = 'sec-hd';
+      hd.innerHTML = `<span class="sec-title">${cat.section === 'audit' ? 'Audit work' : 'Operational time'}</span><span class="sec-rule"></span>`;
+      container.appendChild(hd);
+      lastSec = cat.section;
+    }
+
+    const row = document.createElement('div');
+    row.className = 'cat-row';
+    row.id = `row-${cat.id}`;
+    row.innerHTML = `
+      <div class="cat-top">
+        <div class="cat-info">
+          <div class="cat-name">${cat.name}</div>
+          <div class="cat-desc">${cat.desc}</div>
+        </div>
+        <div class="cat-time-display">
+          <span class="cat-hhmm" id="hhmm-${cat.id}">0:00</span>
+          <span class="cat-mins-sub" id="msub-${cat.id}">0 min</span>
+        </div>
+      </div>
+      <div class="cat-slider-wrap">
+        <div class="cat-track-bg">
+          <div class="cat-track-fill" id="fill-${cat.id}" style="width:0%;background:${cat.color}"></div>
+        </div>
+        <input class="cat-slider" type="range"
+          id="slider-${cat.id}" min="0" max="${MAX_MINS}" step="${STEP}" value="0">
+      </div>`;
+
+    container.appendChild(row);
+
+    const slider = document.getElementById(`slider-${cat.id}`);
+    slider.addEventListener('input', () => {
+      mins[cat.id] = parseInt(slider.value);
+      updateRow(cat.id, cat.color);
+      updateTotal();
+      updateSummary();
+    });
+  });
+}
+
+function updateRow(id, color) {
+  const m = mins[id];
+  const hhEl = document.getElementById(`hhmm-${id}`);
+  const subEl = document.getElementById(`msub-${id}`);
+  const fillEl = document.getElementById(`fill-${id}`);
+  if (hhEl) hhEl.textContent = toHHMM(m);
+  if (subEl) subEl.textContent = m + ' min';
+  if (fillEl) fillEl.style.width = Math.round(m / MAX_MINS * 100) + '%';
+}
+
+function updateTotal() {
+  const tot = totalMins();
+  const rem = TOTAL_MINS - tot;
+  const pct = Math.round(tot / TOTAL_MINS * 100);
+
+  const numEl   = document.getElementById('total-num');
+  const fillEl  = document.getElementById('total-bar-fill');
+  const pctLbl  = document.getElementById('total-bar-pct');
+  const badge   = document.getElementById('total-badge');
+  const hint    = document.getElementById('submit-hint');
+
+  if (numEl) { numEl.textContent = toHHMM(tot); numEl.style.color = tot > TOTAL_MINS ? 'var(--red)' : tot === TOTAL_MINS ? 'var(--accent)' : 'var(--ink)'; }
+  if (fillEl) { fillEl.style.width = Math.min(pct,100)+'%'; fillEl.style.background = tot > TOTAL_MINS ? '#8b2525' : tot === TOTAL_MINS ? '#2d5a3d' : '#378ADD'; }
+  if (pctLbl) pctLbl.textContent = pct + '%';
+
+  if (badge) {
+    if (tot === TOTAL_MINS) { badge.className='total-badge tb-ok'; badge.textContent='✓ 37:30 fully allocated'; }
+    else if (tot > TOTAL_MINS) { badge.className='total-badge tb-over'; badge.textContent=`+${toHHMM(tot-TOTAL_MINS)} over`; }
+    else { badge.className='total-badge tb-rem'; badge.textContent=`${toHHMM(rem)} remaining`; }
+  }
+
+  const name = document.getElementById('analyst-name').value.trim();
+  const role = document.getElementById('analyst-role').value;
+  if (hint) {
+    if (!name) hint.textContent = 'Enter your name to get started.';
+    else if (!role) hint.textContent = 'Select your role.';
+    else if (tot === 0) hint.textContent = 'Drag the sliders to allocate your 37:30 hrs.';
+    else if (tot < TOTAL_MINS) hint.textContent = `${toHHMM(rem)} still unallocated — keep going.`;
+    else if (tot > TOTAL_MINS) hint.textContent = `Over by ${toHHMM(tot - TOTAL_MINS)} — bring it back to 37:30.`;
+    else hint.textContent = 'All hours allocated — ready to submit.';
+  }
+}
+
+function updateSummary() {
+  const tot = totalMins() || 1;
+  const container = document.getElementById('sum-rows');
+  if (!container) return;
+  container.innerHTML = '';
+
+  CATS.forEach(cat => {
+    const m = mins[cat.id];
+    if (m === 0) return;
+    const pct = Math.round(m / TOTAL_MINS * 100);
+    const barW = Math.round(m / tot * 100);
+    const row = document.createElement('div');
+    row.className = 'sum-row';
+    row.innerHTML = `
+      <span class="sum-name">${cat.name}</span>
+      <span class="sum-val">${toHHMM(m)}</span>
+      <div class="sum-bar-wrap">
+        <div class="sum-bar-bg"><div class="sum-bar-fill" style="width:${barW}%;background:${cat.color}"></div></div>
+        <span class="sum-pct">${pct}%</span>
+      </div>`;
+    container.appendChild(row);
+  });
+
+  if (container.innerHTML === '') {
+    container.innerHTML = '<div style="font-size:13px;color:var(--faint);padding:8px 0;font-family:var(--mono)">No time allocated yet.</div>';
+  }
+}
+
+function submitForm() {
+  const name   = document.getElementById('analyst-name').value.trim();
+  const role   = document.getElementById('analyst-role').value;
+  const weekOf = document.getElementById('week-of').value;
+  const tot    = totalMins();
+
+  if (!name)   { alert('Please enter your name.'); return; }
+  if (!role)   { alert('Please select your role.'); return; }
+  if (tot !== TOTAL_MINS) {
+    const diff = tot - TOTAL_MINS;
+    const msg = diff > 0
+      ? `You're over by ${toHHMM(diff)}. Bring the total back to 37:30 before submitting.`
+      : `You have ${toHHMM(TOTAL_MINS - tot)} unallocated. Distribute all 37:30 hrs before submitting.`;
+    alert(msg);
+    return;
+  }
+
+  const roleLabel = { sr:'Sr. Quality Analyst', qa:'Quality Analyst', qpm:'Quality Program Manager' }[role] || role;
+  const panel = document.getElementById('confirm-panel');
+  const subEl  = document.getElementById('confirm-sub');
+  const grid   = document.getElementById('confirm-grid');
+
+  if (subEl) subEl.textContent = `${name} · ${roleLabel} · Week of ${weekOf}`;
+
+  if (grid) {
+    grid.innerHTML = CATS
+      .filter(c => mins[c.id] > 0)
+      .map(c => `<div class="cg-item">
+        <div class="cg-lbl">${c.name}</div>
+        <div class="cg-val">${toHHMM(mins[c.id])}</div>
+      </div>`)
+      .join('');
+  }
+
+  if (panel) { panel.style.display='block'; panel.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+
+  // Structured output — replace with webhook/sheet integration if needed
+  console.log('QA Capacity Self-Assessment', {
+    submittedAt: new Date().toISOString(),
+    name, role, weekOf,
+    notes: document.getElementById('notes').value,
+    totalMins: tot,
+    allocation: Object.fromEntries(CATS.map(c => [c.id, { mins: mins[c.id], hhmm: toHHMM(mins[c.id]) }])),
+  });
+}
+
+document.getElementById('analyst-name').addEventListener('input', updateTotal);
+document.getElementById('analyst-role').addEventListener('change', updateTotal);
+
+// ── Init ──
+buildCats();
+updateTotal();
+updateSummary();
+</script>
+</body>
+</html>
